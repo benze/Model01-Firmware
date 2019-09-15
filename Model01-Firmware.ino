@@ -55,7 +55,7 @@
 #include "Kaleidoscope-LED-Stalker.h"
 
 // Support for an LED mode that prints the keys you press in letters 4px high
-#include "Kaleidoscope-LED-AlphaSquare.h"
+//#include "Kaleidoscope-LED-AlphaSquare.h"
 
 // Support for shared palettes for other plugins, like Colormap below
 #include "Kaleidoscope-LED-Palette-Theme.h"
@@ -77,6 +77,14 @@
 
 // Support for Qukeys
 #include "Kaleidoscope-Qukeys.h"
+
+// Support for OneShot
+#include "Kaleidoscope-OneShot.h"
+
+// Support for Active Modifier LED
+#include "Kaleidoscope-LED-ActiveModColor.h"
+
+
 
 /** This 'enum' is a list of all the macros used by the Model 01's firmware
   * The names aren't particularly important. What is important is that each
@@ -181,14 +189,15 @@ KEYMAPS(
    Key_Backtick, Key_Q, Key_W, Key_E, Key_R, Key_T, Key_Tab,
    Key_PageUp,   Key_A, Key_S, Key_D, Key_F, Key_G,
    Key_PageDown, Key_Z, Key_X, Key_C, Key_V, Key_B, Key_Escape,
-   Key_LeftControl, Key_Backspace, Key_NoKey, Key_LeftShift,
-   ShiftToLayer(FUNCTION),
+   OSM(LeftControl), Key_Backspace, Key_NoKey, OSM(LeftShift),
+//   ShiftToLayer(FUNCTION),
+  OSL(FUNCTION),
 
    M(MACRO_ANY),  Key_6, Key_7, Key_8,     Key_9,         Key_0,         LockLayer(NUMPAD),
    Key_NoKey,     Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Equals,
                   Key_H, Key_J, Key_K,     Key_L,         Key_Semicolon, Key_Quote,
    Key_RightAlt,  Key_N, Key_M, Key_Comma, Key_Period,    Key_Slash,     Key_Minus,
-   Key_RightShift, Key_LeftAlt, Key_Spacebar, Key_RightControl,
+   OSM(RightShift), OSM(LeftAlt), Key_Spacebar, OSM(RightControl),
    ShiftToLayer(FUNCTION)),
 
 #elif defined (PRIMARY_KEYMAP_DVORAK)
@@ -523,6 +532,12 @@ KALEIDOSCOPE_INIT_PLUGINS(
   // same time.
   MagicCombo,
 
+  // Enable the OneShot plugin
+  OneShot,
+
+  // Active Modifier LED - place last in list to work on top of any other LED modifying plugin
+  ActiveModColorEffect,
+
   // The USBQuirks plugin lets you do some things with USB that we aren't
   // comfortable - or able - to do automatically, but can be useful
   // nevertheless. Such as toggling the key report protocol between Boot (used
@@ -559,7 +574,7 @@ void setup() {
   NumPad.numPadLayer = NUMPAD;
 
   // We configure the AlphaSquare effect to use RED letters
-  AlphaSquare.color = CRGB(255, 0, 0);
+//  AlphaSquare.color = CRGB(255, 0, 0);
 
   // We set the brightness of the rainbow effects to 150 (on a scale of 0-255)
   // This draws more than 500mA, but looks much nicer than a dimmer effect
@@ -590,7 +605,6 @@ void setup() {
   // maps for. To make things simple, we set it to five layers, which is how
   // many editable layers we have (see above).
   ColormapEffect.max_layers(5);
-
 
 }
 
