@@ -84,6 +84,10 @@
 // Support for Active Modifier LED
 #include "Kaleidoscope-LED-ActiveModColor.h"
 
+// Support for SpaceCadet
+#include "Kaleidoscope-SpaceCadet.h"
+
+
 
 
 /** This 'enum' is a list of all the macros used by the Model 01's firmware
@@ -100,7 +104,9 @@
   */
 
 enum { MACRO_VERSION_INFO,
-       MACRO_ANY
+       MACRO_ANY,
+       TOGGLE_ONESHOT,
+       TOGGLE_SPACECADET
      };
 
 
@@ -153,7 +159,7 @@ enum { MACRO_VERSION_INFO,
   *
   */
 
-enum { PRIMARY, NUMPAD, FUNCTION }; // layers
+enum { PRIMARY, NUMPAD, FUNCTION, PLUGINS }; // layers
 
 
 /**
@@ -169,10 +175,10 @@ enum { PRIMARY, NUMPAD, FUNCTION }; // layers
   *
   */
 
-#define PRIMARY_KEYMAP_QWERTY
+// #define PRIMARY_KEYMAP_QWERTY
 // #define PRIMARY_KEYMAP_COLEMAK
 // #define PRIMARY_KEYMAP_DVORAK
-// #define PRIMARY_KEYMAP_CUSTOM
+#define PRIMARY_KEYMAP_CUSTOM
 
 
 
@@ -189,15 +195,14 @@ KEYMAPS(
    Key_Backtick, Key_Q, Key_W, Key_E, Key_R, Key_T, Key_Tab,
    Key_PageUp,   Key_A, Key_S, Key_D, Key_F, Key_G,
    Key_PageDown, Key_Z, Key_X, Key_C, Key_V, Key_B, Key_Escape,
-   OSM(LeftControl), Key_Backspace, Key_NoKey, OSM(LeftShift),
-//   ShiftToLayer(FUNCTION),
-  OSL(FUNCTION),
+   Key_LeftControl, Key_Backspace, Key_LeftGui, Key_LeftShift,
+   ShiftToLayer(FUNCTION),
 
    M(MACRO_ANY),  Key_6, Key_7, Key_8,     Key_9,         Key_0,         LockLayer(NUMPAD),
-   Key_NoKey,     Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Equals,
+   Key_Enter,     Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Equals,
                   Key_H, Key_J, Key_K,     Key_L,         Key_Semicolon, Key_Quote,
    Key_RightAlt,  Key_N, Key_M, Key_Comma, Key_Period,    Key_Slash,     Key_Minus,
-   OSM(RightShift), OSM(LeftAlt), Key_Spacebar, OSM(RightControl),
+   Key_RightShift, Key_LeftAlt, Key_Spacebar, Key_RightControl,
    ShiftToLayer(FUNCTION)),
 
 #elif defined (PRIMARY_KEYMAP_DVORAK)
@@ -241,14 +246,14 @@ KEYMAPS(
    Key_Backtick, Key_Q, Key_W, Key_E, Key_R, Key_T, Key_Tab,
    Key_PageUp,   Key_A, Key_S, Key_D, Key_F, Key_G,
    Key_PageDown, Key_Z, Key_X, Key_C, Key_V, Key_B, Key_Escape,
-   Key_LeftControl, Key_Backspace, Key_LeftGui, Key_LeftShift,
-   ShiftToLayer(FUNCTION),
+   OSM(LeftControl), Key_Backspace, ___, OSM(LeftShift),
+  OSL(FUNCTION),
 
-   M(MACRO_ANY),  Key_6, Key_7, Key_8,     Key_9,         Key_0,         LockLayer(NUMPAD),
-   Key_Enter,     Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Equals,
-                  Key_H, Key_J, Key_K,     Key_L,         Key_Semicolon, Key_Quote,
-   Key_RightAlt,  Key_N, Key_M, Key_Comma, Key_Period,    Key_Slash,     Key_Minus,
-   Key_RightShift, Key_LeftAlt, Key_Spacebar, Key_RightControl,
+   M(MACRO_ANY),           Key_6, Key_7, Key_8,     Key_9,         Key_0,         LockLayer(NUMPAD),
+   ___,                    Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Equals,
+                           Key_H, Key_J, Key_K,     Key_L,         Key_Semicolon, Key_Quote,
+   ShiftToLayer(PLUGINS),  Key_N, Key_M, Key_Comma, Key_Period,    Key_Slash,     Key_Minus,
+   OSM(RightShift), OSM(LeftAlt), Key_Spacebar, OSM(RightControl),
    ShiftToLayer(FUNCTION)),
 
 #else
@@ -288,6 +293,24 @@ KEYMAPS(
    Key_PcApplication,          Consumer_Mute,          Consumer_VolumeDecrement, Consumer_VolumeIncrement, Consumer_PlaySlashPause, Key_Backslash,    Key_Pipe,
    ___, ___, Key_Enter, ___,
    ___)
+
+
+  // layer to enable/disable plugins
+   ,[PLUGINS] = KEYMAP_STACKED
+  (___, M(TOGGLE_ONESHOT), M(TOGGLE_SPACECADET), ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___,
+   ___,
+
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___,
+   ___ )
+   
 ) // KEYMAPS(
 
 /* Re-enable astyle's indent enforcement */
@@ -347,6 +370,12 @@ const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
 
   case MACRO_ANY:
     anyKeyMacro(keyState);
+    break;
+
+  case TOGGLE_ONESHOT:
+    break;
+
+  case TOGGLE_SPACECADET:
     break;
   }
   return MACRO_NONE;
@@ -426,6 +455,17 @@ static void enterHardwareTestMode(uint8_t combo_index) {
   HardwareTestMode.runTests();
 }
 
+/**
+ * This toggles the SpaceCadet functionality
+ */
+static void toggleSpaceCadet(uint8_t keyState) {
+  if (SpaceCadet.active()){
+    SpaceCadet.disable();
+  } else {
+    SpaceCadet.enable();
+  }
+}
+ 
 
 /** Magic combo list, a list of key combo and action pairs the firmware should
  * recognise.
@@ -532,17 +572,21 @@ KALEIDOSCOPE_INIT_PLUGINS(
   // same time.
   MagicCombo,
 
+
+  // The USBQuirks plugin lets you do some things with USB that we aren't
+  // comfortable - or able - to do automatically, but can be useful
+  // nevertheless. Such as toggling the key report protocol between Boot (used
+  // by BIOSes) and Report (NKRO).
+  USBQuirks,
+
   // Enable the OneShot plugin
   OneShot,
 
   // Active Modifier LED - place last in list to work on top of any other LED modifying plugin
   ActiveModColorEffect,
 
-  // The USBQuirks plugin lets you do some things with USB that we aren't
-  // comfortable - or able - to do automatically, but can be useful
-  // nevertheless. Such as toggling the key report protocol between Boot (used
-  // by BIOSes) and Report (NKRO).
-  USBQuirks
+  // Enable SpaceCadet
+  SpaceCadet
 );
 
 /** The 'setup' function is one of the two standard Arduino sketch functions.
@@ -605,6 +649,25 @@ void setup() {
   // maps for. To make things simple, we set it to five layers, which is how
   // many editable layers we have (see above).
   ColormapEffect.max_layers(5);
+
+  //Set the keymap with a 250ms timeout per-key
+  //Setting is {KeyThatWasPressed, AlternativeKeyToSend, TimeoutInMS}
+  //Note: must end with the SPACECADET_MAP_END delimiter
+  static kaleidoscope::plugin::SpaceCadet::KeyBinding spacecadetmap[] = {
+    {Key_LeftShift, Key_LeftParen, 250}
+    , {Key_RightShift, Key_RightParen, 250}
+    , {Key_LeftGui, Key_LeftCurlyBracket, 250}
+    , {Key_RightAlt, Key_RightCurlyBracket, 250}
+    , {Key_LeftAlt, Key_RightCurlyBracket, 250}
+    , {Key_LeftControl, Key_LeftBracket, 250}
+    , {Key_RightControl, Key_RightBracket, 250}
+    , SPACECADET_MAP_END
+  };
+  
+  //Set the map.
+  SpaceCadet.map = spacecadetmap;
+  // start space cadet disabled
+  SpaceCadet.disable();  
 
 }
 
